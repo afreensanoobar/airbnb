@@ -38,6 +38,13 @@ app.get("/listings/new", (req, res) => {
   res.render("listings/new.ejs")
 })
 
+//Edit Route
+app.get("/listings/:id/edit", async (req, res) => {
+  const { id } = req.params
+  const listing = await Listing.findById(id)
+  res.render("listings/edit.ejs", { listing })
+})
+
 // SHOW route after
 app.get("/listings/:id", async (req, res) => {
   let { id } = req.params
@@ -52,12 +59,6 @@ app.post("/listings", async (req, res) => {
   res.redirect("/listings")
 })
 
-//Edit Route
-app.get("/listings/:id/edit", async (req, res) => {
-  const { id } = req.params
-  const listing = await Listing.findById(id)
-  res.render("listings/edit.ejs", { listing })
-})
 // app.get("/testListing", async (req, res) => {
 //   let sampleListing = new Listing({
 //     title: "My New villa ",
