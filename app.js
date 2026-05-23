@@ -7,12 +7,11 @@ const methodOverride = require("method-override")
 const ejsMate = require("ejs-mate")
 
 app.engine("ejs", ejsMate)
-
 app.use(methodOverride("_method"))
-
 app.set("view engine", "ejs")
 app.set("views", path.join(__dirname, "views"))
 app.use(express.urlencoded({ extended: true }))
+app.use(express.static(path.join(__dirname, "public")))
 
 const MONGO_URL = "mongodb://127.0.0.1:27017/wanderlust"
 
@@ -46,13 +45,6 @@ app.get("/listings/new", (req, res) => {
   res.render("listings/new.ejs")
 })
 
-// SHOW route after
-app.get("/listings/:id", async (req, res) => {
-  let { id } = req.params
-  const listing = await Listing.findById(id)
-  res.render("listings/show.ejs", { listing })
-})
-
 //Create Route
 app.post("/listings", async (req, res) => {
   const newListing = new Listing(req.body.listing)
@@ -79,7 +71,12 @@ app.delete("/listings/:id", async (req, res) => {
   await Listing.findByIdAndDelete(id)
   res.redirect("/listings")
 })
-
+// SHOW route after
+app.get("/listings/:id", async (req, res) => {
+  let { id } = req.params
+  const listing = await Listing.findById(id)
+  res.render("listings/show.ejs", { listing })
+})
 //Test Route to create a sample listing
 
 // app.get("/testListing", async (req, res) => {
