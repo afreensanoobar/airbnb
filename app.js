@@ -3,6 +3,12 @@ const app = express()
 const mongoose = require("mongoose")
 const Listing = require("./models/listing.js")
 const path = require("path")
+const methodOverride = require("method-override")
+const ejsMate = require("ejs-mate")
+
+app.engine("ejs", ejsMate)
+
+app.use(methodOverride("_method"))
 
 app.set("view engine", "ejs")
 app.set("views", path.join(__dirname, "views"))
@@ -24,6 +30,8 @@ async function main() {
 
 app.set("view engine", "ejs")
 app.set("views", path.join(__dirname, "views"))
+app.use(express.urlencoded({ extended: true }))
+app.use(methodOverride("_method"))
 
 app.get("/", (req, res) => {
   res.send("Hi! , I am root")
@@ -36,13 +44,6 @@ app.get("/listings", async (req, res) => {
 // NEW route first
 app.get("/listings/new", (req, res) => {
   res.render("listings/new.ejs")
-})
-
-//Edit Route
-app.get("/listings/:id/edit", async (req, res) => {
-  const { id } = req.params
-  const listing = await Listing.findById(id)
-  res.render("listings/edit.ejs", { listing })
 })
 
 // SHOW route after
@@ -58,6 +59,28 @@ app.post("/listings", async (req, res) => {
   await newListing.save()
   res.redirect("/listings")
 })
+//Edit Route
+app.get("/listings/:id/edit", async (req, res) => {
+  const { id } = req.params
+  const listing = await Listing.findById(id)
+  res.render("listings/edit.ejs", { listing })
+})
+
+//Update Route
+app.put("/listings/:id", async (req, res) => {
+  const { id } = req.params
+  await Listing.findByIdAndUpdate(id, { ...req.body.listing })
+  res.redirect(`/listings/${id}`)
+})
+
+//Delete Route
+app.delete("/listings/:id", async (req, res) => {
+  const { id } = req.params
+  await Listing.findByIdAndDelete(id)
+  res.redirect("/listings")
+})
+
+//Test Route to create a sample listing
 
 // app.get("/testListing", async (req, res) => {
 //   let sampleListing = new Listing({
