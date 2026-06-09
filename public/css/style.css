@@ -111,3 +111,21 @@ body {
   background-color: #fe424d !important;
   border: none !important;
 }
+
+
+/* show pge */
+
+.show-img{
+  height:30vh;
+}
+
+.btns
+{
+  display: flex;
+  gap: 1rem;
+}
+
+.show-card{
+padding-left:0;
+padding-right:0;
+}

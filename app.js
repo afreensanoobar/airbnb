@@ -92,6 +92,10 @@ app.get("/listings/:id", async (req, res) => {
 //   res.send("successfull saved")
 // })
 
+
+app.use(err, req , res, next => {
+  res.status(500).send("Something went wrong")
+})
 app.listen(8080, () => {
-  console.log("server is listening   at port 8080")
+  console.log("server is listening   at port 8080");
 })
