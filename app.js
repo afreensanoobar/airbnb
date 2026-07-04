@@ -1,14 +1,14 @@
 const express = require("express")
 const app = express()
 const mongoose = require("mongoose")
-const Listing = require("./models/listing.js")
+
 const path = require("path")
 const methodOverride = require("method-override")
 const ejsMate = require("ejs-mate")
-const wrapAsync = require("./utils/wrapAsync.js")
-const ExpressError = require("./utils/ExpressError.js")
-const {listingSchema} = require("./schema.js")
 
+const ExpressError = require("./utils/ExpressError.js")
+const listings = require("./routes/listing.js")
+const reviews = require("./routes/review.js")
 
 app.engine("ejs", ejsMate)
 app.use(methodOverride("_method"))
@@ -39,76 +39,23 @@ app.use(methodOverride("_method"))
 app.get("/", (req, res) => {
   res.send("Hi! , I am root")
 })
-//Index Route
-app.get("/listings", wrapAsync(async (req, res) => {
-  const allListings = await Listing.find({})
-  res.render("listings/index.ejs", { allListings })
-}))
-// NEW route first
-app.get("/listings/new", (req, res) => {
-  res.render("listings/new.ejs")
-})
 
-//Create Route
-app.post("/listings", wrapAsync(async (req, res,next) => {
-let result = listingSchema.validate(req.body);
-console.log(result)
-    const newListing = new Listing(req.body.listing)
-    await newListing.save()
-    res.redirect("/listings")
-}))
-//Edit Route
-app.get("/listings/:id/edit",wrapAsync( async (req, res) => {
-  const { id } = req.params
-  const listing = await Listing.findById(id)
-  res.render("listings/edit.ejs", { listing })
-}))
+//listings
+app.use("/listings", listings)
+//reviews routes
+app.use("/listings/:id/reviews", require("./routes/review.js"))
 
-//Update  Route
-app.put("/listings/:id", wrapAsync(async (req, res) => {
-  const { id } = req.params
-  await Listing.findByIdAndUpdate(id, { ...req.body.listing })
-  res.redirect(`/listings/${id}`)
-}))
-
-//Delete Route
-app.delete("/listings/:id", wrapAsync(async (req, res) => {
-  const { id } = req.params
-  await Listing.findByIdAndDelete(id)
-  res.redirect("/listings")
-}))
-// SHOW route after
-app.get("/listings/:id", wrapAsync(async (req, res) => {
-  let { id } = req.params
-  const listing = await Listing.findById(id)
-  res.render("listings/show.ejs", { listing })
-}))
-//Test Route to create a sample listing
-
-// app.get("/testListing", async (req, res) => {
-//   let sampleListing = new Listing({
-//     title: "My New villa ",
-//     description: "By the Beach",
-//     price: 1200,
-//     location: "Calangate , Goa ",
-//     country: "India",
-//   })
-//   await sampleListing.save()
-//   console.log("sample was saved")
-//   res.send("successfull saved")
-// })
- 
 app.use((req, res, next) => {
   next(new ExpressError(404, "Page Not Found"));
 });
 
 app.use((err, req, res, next) => {
   let { statusCode = 500, message = "Oh No, Something went wrong" } = err;
-res.status(statusCode).render("error.ejs", { message });
+res.status(statusCode).render("error.ejs", { message }); 
   // res.status(statusCode).send(message);
 });
 
-
+ 
 app.listen(8080, () => {
   console.log("server is listening   at port 8080");
 })
