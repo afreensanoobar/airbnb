@@ -7,6 +7,9 @@ const ejsMate = require("ejs-mate")
 const ExpressError = require("./utils/ExpressError.js")
 const session = require("express-session")
 const flash = require("connect-flash")
+const passport = require("passport")
+const LocalStrategy = require("passport-local")
+const User = require("./models/user.js") 
 
 
 const listings = require("./routes/listing.js")
@@ -53,13 +56,30 @@ app.get("/", (req, res) => {
   
 app.use(session(sessionOptions));
 app.use(flash());
-console.log(flash() )
+ 
+app.use(passport.initialize());
+app.use(passport.session());
+
+passport.use(new LocalStrategy(User.authenticate()));
+passport.serializeUser(User.serializeUser());
+passport.deserializeUser(User.deserializeUser());
 
 app.use((req, res, next) => {
   res.locals.success = req.flash("success");
   res.locals.error = req.flash("error");
   next();
 } );
+
+app.get("/demouser", async (req, res) => {
+  let fakeUser = new User({
+    email: "demo@gmail.com",
+    username: "demoUser"
+  });
+  let registeredUser = await User.register(fakeUser, "demoPassword"); // This will hash the password and save the user
+  
+  await fakeUser.save();
+  res.send(registeredUser);
+});
 
 //listings
 app.use("/listings", listings)
@@ -70,6 +90,7 @@ app.use("/listings/:id/reviews", require("./routes/review.js"))
 app.use( (req, res, next) => {
   next(new ExpressError(404, "Page Not Found"));
 });
+
 
 app.use((err, req, res, next) => {
   let { statusCode = 500, message = "Oh No, Something went wrong" } = err;
