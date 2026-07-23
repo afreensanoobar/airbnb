@@ -70,16 +70,6 @@ app.use((req, res, next) => {
   next();
 } );
 
-app.get("/demouser", async (req, res) => {
-  let fakeUser = new User({
-    email: "demo@gmail.com",
-    username: "demoUser"
-  });
-  let registeredUser = await User.register(fakeUser, "demoPassword"); // This will hash the password and save the user
-  
-  await fakeUser.save();
-  res.send(registeredUser);
-});
 
 //listings
 app.use("/listings", listings)
